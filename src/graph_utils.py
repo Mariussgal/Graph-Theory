@@ -101,7 +101,8 @@ def bfs_shortest_path(adj_matrix, node_to_index, start, end, nodes):
         color[current_idx] = 'black'
     return []
 
-def draw_graph(edges, nodes, leaders, title="Graph - Leaders in red", output_file="graph.png"):
+def draw_graph(edges, nodes, leaders, title="Graph - Leaders in red", output_file = "graph.png"):
+    
     G = nx.DiGraph()
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
@@ -120,6 +121,8 @@ def draw_graph(edges, nodes, leaders, title="Graph - Leaders in red", output_fil
     plt.tight_layout()
     plt.savefig(output_file)
     plt.show()
+
+output_directory = "C:\\Users\\mariu\\PBL3\\graphs"
 
 def analyze_toy_dataset():
 
@@ -148,7 +151,7 @@ def analyze_toy_dataset():
         path = bfs_shortest_path(adj_matrix, node_to_index, leaders[0], leaders[1], nodes)
         print(f"Shortest path between leaders {leaders[0]} and {leaders[1]} is: {path}")
         
-        draw_graph(edges, nodes, leaders, "Toy dataset graph - Leaders in red", "toy_graph.png")
+        draw_graph(edges, nodes, leaders, "Toy dataset graph - Leaders in red", output_file=os.path.join(output_directory, "toy_graph.png"))
         
         print("=== Toy dataset Analysis done ===\n")
         return True
@@ -194,7 +197,7 @@ def analyze_karate_club_dataset():
             path = bfs_shortest_path(adj_matrix, node_to_index, leaders[0], leaders[1], nodes)
             print(f"shortest path between leaders {leaders[0]} and {leaders[1]} is: {path}")
         
-        draw_graph(bidirectional_edges, nodes, leaders, "Karate Club graph - Leaders in red", "karate_graph.png")
+        draw_graph(bidirectional_edges, nodes, leaders, "Karate Club graph - Leaders in red", output_file=os.path.join(output_directory, "karate_graph.png"))
         
         print("=== Analysis of Karate Club dataset done ===\n")
         return True
