@@ -2,6 +2,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import os
+from collections import defaultdict
+
 
 def edge_list(file_path):
     edges = []
@@ -153,7 +155,7 @@ def analyze_toy_dataset():
         
         draw_graph(edges, nodes, leaders, "Toy dataset graph - Leaders in red", output_file=os.path.join(output_directory, "toy_graph.png"))
         
-        print("=== Toy dataset Analysis done ===\n")
+        print("\n=== Toy dataset Analysis done ===\n")
         return True
         
     except FileNotFoundError:
@@ -199,7 +201,7 @@ def analyze_karate_club_dataset():
         
         draw_graph(bidirectional_edges, nodes, leaders, "Karate Club graph - Leaders in red", output_file=os.path.join(output_directory, "karate_graph.png"))
         
-        print("=== Analysis of Karate Club dataset done ===\n")
+        print("\n=== Analysis of Karate Club dataset done ===\n")
         return True
         
     except FileNotFoundError:
@@ -208,3 +210,60 @@ def analyze_karate_club_dataset():
     except Exception as e:
         print(f"an error occured: {e}")
         return False
+    
+
+def analyze_student_dataset():
+    file_path = os.path.join("data", "students.csv")
+    output_matrix = os.path.join("data", "students_adjacency_matrix.txt")
+    
+    try:
+        print("\n=== Analysis of Student Cooperation dataset ===")
+
+        edges = []
+        nodes = set()  #set() means that it deeletes all the multiple iterations of a number to keep only one of them
+        edge_types = defaultdict(list)
+
+        with open(file_path, 'r') as file: 
+            first_line = file.readline().strip()
+            if first_line.lower().replace(' ','').replace(',','') in ['id1id2type', 'sourcetargettype']:
+                print (f"Header found and ignored: {first_line}")
+            for line in file:
+                try:
+                    parts = line.strip().split(',')
+                    if len(parts) ==3:
+                        source, target, type = parts
+                        source, target = int(source), int(target) 
+
+                        edges.append((source, target))
+                        nodes.add(source)
+                        nodes.add(target)
+                        edge_types[(source, target)].append(edge_types)
+                    else:
+                        print(f"Line ignored (wrong format):{line.strip()}")
+                except ValueError as e: 
+                    print(f"Line ignored: {line.strip()} - {e}")
+        
+        nodes = sorted(list(nodes))
+        print(f"Number of nodes: {len(nodes)}")
+        print(f"Number of edges: {len(edges)}")
+
+        print("=== Analysis of Student Cooperation dataset done ===\n")
+        return True
+    except FileNotFoundError:
+        print(f"file '{file_path}' not found.")
+        return False
+    except Exception as e:
+        print(f"an error occured: {e}")
+        return False
+
+
+
+
+def analyze_anybeatAnonymized_dataset():
+    
+    file_path = os.path.join("data", "anybeatAnonymized.csv")
+    output_matrix = os.path.join("data", "anybeatAnonymized_adjacency_matrix.txt")
+
+ 
+    
+
