@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import os
 import csv 
+from scipy import sparse
 
 def edge_list(file_path):
     edges = []
@@ -325,10 +326,216 @@ def analyze_student_dataset():
     return True
 
 def analyze_anybeatAnonymized_dataset():
+    import numpy as np
+    from collections import defaultdict, deque
+    import random
     
-    file_path = os.path.join("data", "anybeatAnonymized.csv")
-    output_matrix = os.path.join("data", "anybeatAnonymized_adjacency_matrix.txt")
-
- 
+    input_file = ["anybeatAnonymized.csv"]
+    output_matrix = os.path.join("data", "anybeat_adjacency_matrix.txt")
     
+    print("\n=== Analysis of Anybeat dataset ===\n")
+    
+    for filename in input_file:
+        if os.path.exists(filename):
+            input_file = filename
+            break
+        
+        data_path = os.path.join("data", filename)
+        if os.path.exists(data_path):
+            input_file = data_path
+            break
+    
+    if input_file is None:
+        print("Error: Could not find Anybeat data file")
+        return
+    
+    try:
+        edges = []
+        node_connections = defaultdict(set)  
+        
+        with open(input_file, 'r') as file:
+            csv_reader = csv.reader(file)
+            try:
+                header = next(csv_reader)  
+                print(f"Header ignored: {header}")
+            except StopIteration:
+                print("Warning: CSV file appears to be empty")
+                return
+  
+            for row in csv_reader:
+                        id1 = int(row[0])
+                        id2 = int(row[1])
+                        edges.append((id1, id2))
+                        node_connections[id1].add(id2)
+                        node_connections[id2].add(id1)
+                        
+        nodes = sorted(node_connections.keys())
+        
+        print(f"Number of nodes: {len(nodes)}")            
+        print(f"Number of edges: {len(edges)}")
+        
+        if not edges:
+            print("Error: No edges found in the input file")
+            return
+        
+        node_degrees = [(node, len(connections)) for node, connections in node_connections.items()]
+        node_degrees.sort(key=lambda x: x[1], reverse=True)
+        
+        sample_size = 500
+        sample_nodes = [node for node, _ in node_degrees[:sample_size]]
+        
+        node_to_index = {node: i for i, node in enumerate(sample_nodes)}
+        
+        print(f"Creating adjacency matrix for {sample_size} most connected nodes")
+        adj_matrix = np.zeros((sample_size, sample_size), dtype=int)
+        edge_count = 0
+           
+        for i, node1 in enumerate(sample_nodes):
+            for node2 in node_connections[node1]:
+                j = node_to_index.get(node2)
+                if j is not None:  
+                    adj_matrix[i, j] = 1
+                    edge_count += 1
+        print(f"Filled adjacency matrix with {edge_count} connections")
+        print(f"Adjacency matrix created:")
+      
+        try:
+            with open(output_matrix, 'w') as file:
+              
+                file.write("," + ",".join(str(node) for node in sample_nodes) + "\n")
+                
+                for i, node in enumerate(sample_nodes):
+                    file.write(f"{node}," + ",".join(map(str, adj_matrix[i, :])) + "\n")
+            print(f"Adjacency matrix saved in '{output_matrix}'")
+            
+        except Exception as e:
+            print(f"Error saving matrix: {e}")
+        
+       
+        matrix_degrees = []
+        for i, node in enumerate(sample_nodes):
+            degree = np.sum(adj_matrix[i, :])
+            matrix_degrees.append((node, degree))
+        
+        matrix_degrees.sort(key=lambda x: x[1], reverse=True)
+        
+        matrix_leaders = [node for node, _ in matrix_degrees[:5]]
+        matrix_leader_degrees = [degree for _, degree in matrix_degrees[:5]]
+        
+        print("The 5 most important leaders are:")
+        for i, (leader, degree) in enumerate(zip(matrix_leaders, matrix_leader_degrees)):
+            print(f"{i+1}. Node {leader} with {int(degree)} connections in matrix")
+        
+        leaders = matrix_leaders  
+        
+        print("\nIdentifying followers of each leader from adjacency matrix...")
+        for leader in leaders:
+            i = node_to_index[leader]
+            follower_indices = np.where(adj_matrix[i, :] == 1)[0]
+            followers = [sample_nodes[j] for j in follower_indices]
 
+            display_followers = followers[:5]
+            print(f"Leader {leader} has {len(followers)} followers in matrix, including: {display_followers}")
+        
+    
+        if len(leaders) >= 2:
+            print("\nFinding most important path between top leaders:")
+            
+            def bfs_shortest_path(adj_matrix, start_idx, end_idx, n):
+                queue = deque([(start_idx, [start_idx])])
+                visited = set([start_idx])
+                
+                while queue:
+                    (node, path) = queue.popleft()
+                    neighbors = np.where(adj_matrix[node, :] == 1)[0]
+                    
+                    for neighbor in neighbors:
+                        if neighbor not in visited:
+                            if neighbor == end_idx:
+                                return path + [neighbor]
+                            visited.add(neighbor)
+                            queue.append((neighbor, path + [neighbor]))
+                return None
+        
+            leader1_idx = node_to_index[leaders[0]]
+            leader2_idx = node_to_index[leaders[1]]
+            
+            path_indices = bfs_shortest_path(adj_matrix, leader1_idx, leader2_idx, sample_size)
+            
+            if path_indices:
+                important_path = [sample_nodes[idx] for idx in path_indices]
+                print(f"Most important path between leaders {leaders[0]} and {leaders[1]} is: {important_path}")
+            else:
+                print(f"No path exists between leaders {leaders[0]} and {leaders[1]}")
+                important_path = []
+        else:
+            important_path = []
+            print("Not enough leaders to find a path")
+
+        try:
+            import networkx as nx
+            import matplotlib.pyplot as plt
+            
+            print("\nCreating visualization of leaders and important path:")
+           
+            G = nx.Graph()
+            G.add_nodes_from(sample_nodes)
+            
+            for i in range(sample_size):
+                for j in range(sample_size):
+                    if adj_matrix[i, j] == 1:
+                        G.add_edge(sample_nodes[i], sample_nodes[j])
+            
+         
+            plt.figure(figsize=(15, 15))
+            nodes_to_draw = set(important_path + leaders)
+            other_nodes = [node for node in sample_nodes if node not in nodes_to_draw]
+            if len(other_nodes) > 50:  
+                other_nodes = random.sample(other_nodes, 50)
+            nodes_to_draw.update(other_nodes)
+            
+            subgraph = G.subgraph(nodes_to_draw)
+            pos = nx.spring_layout(subgraph, seed=42)
+            regular_nodes = [node for node in subgraph.nodes() if node not in leaders and node not in important_path]
+            
+            nx.draw_networkx_nodes(subgraph, pos, nodelist=regular_nodes, node_color='lightblue', node_size=300, alpha=0.7)
+            
+            path_nodes = [node for node in important_path if node not in leaders]
+            if path_nodes:
+                nx.draw_networkx_nodes(subgraph, pos, nodelist=path_nodes, node_color='green', node_size=500, alpha=0.8)
+            
+            nx.draw_networkx_nodes(subgraph, pos, nodelist=leaders, node_color='red', node_size=700, alpha=0.9)
+
+            path_edges = []
+            if len(important_path) > 1:
+                path_edges = [(important_path[i], important_path[i+1]) for i in range(len(important_path)-1)]
+
+            other_edges = [(u, v) for u, v in subgraph.edges() if (u, v) not in path_edges and (v, u) not in path_edges]
+            
+            nx.draw_networkx_edges(subgraph, pos, edgelist=other_edges, width=1, alpha=0.5, edge_color='gray')
+
+            if path_edges:
+                nx.draw_networkx_edges(subgraph, pos, edgelist=path_edges, width=3, alpha=1.0, edge_color='green')
+
+            labels = {node: str(node) for node in subgraph.nodes()}            
+            nx.draw_networkx_labels(subgraph, pos, labels=labels, font_size=10, font_weight='bold')
+            
+            plt.title("Anybeat graph - Leaders (red), Important Path (green)")
+            plt.axis('off')
+            plt.tight_layout()
+            
+            output_file = os.path.join(output_directory, "anybeat_graph.png")
+            plt.savefig(output_file, dpi=300)
+            print(f"graph saved in: {output_file}")
+        
+        except Exception as e:
+            print(f"Error during visualization: {e}")
+            import traceback
+            traceback.print_exc()
+
+    except Exception as e:
+        print(f"Error during analysis: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+    return True

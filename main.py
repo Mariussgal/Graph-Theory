@@ -1,4 +1,4 @@
-from src.graph_utils import analyze_toy_dataset, analyze_karate_club_dataset, analyze_student_dataset
+from src.graph_utils import analyze_toy_dataset, analyze_karate_club_dataset, analyze_student_dataset, analyze_anybeatAnonymized_dataset
 
 def show_menu():
     print("\n" + "="*50)
@@ -25,7 +25,7 @@ def main():
         elif choice == "3":
             analyze_student_dataset()
         elif choice == "4":
-            print("Analysis of the Anybeat dataset is not yet implemented.")
+           analyze_anybeatAnonymized_dataset()
         else:
             print("\nInvalid choice. Enter a number between 0 and 4.")
         
