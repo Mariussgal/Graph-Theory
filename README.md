@@ -1,29 +1,29 @@
-# Social Network Analysis Tool
+# 🔍 Social Network Analysis Tool
 
-## Overview
+## 📚 Overview
 As part of an academic assignment, I developed a project focused on analyzing social networks using graph theory and Python.
 
-## Features
+## 🚀 Features
 - Analyze various social network datasets
 - Generate adjacency matrices
 - Identify network leaders and followers
 - Visualize social network graphs
 - Implement breadth-first search (BFS) for path finding
 
-## Datasets
+## 📂 Datasets
 The project includes four datasets of increasing complexity:
 1. **Toy Dataset**: A small example network
 2. **Karate Club Dataset**: Social network of a karate club
 3. **Student Cooperation Dataset**: Network of student interactions
 4. **Anybeat Dataset**: Large online community network
 
-## Requirements
+## 🧰 Requirements
 - Python 3.x
 - NumPy
 - NetworkX
 - Matplotlib
 
-## Installation
+## 🛠️ Installation
 1. Clone the repository
 ```bash
 git clone https://github.com/Mariussgal/Graph-Theory.git
@@ -35,20 +35,20 @@ cd Graph-Theory
 pip install numpy networkx matplotlib
 ```
 
-## Usage
+## ▶️ Usage
 Run the main script to interact with the analysis tool:
 ```bash
 python main.py
 ```
 
-### Menu Options
+### 📋 Menu Options
 1. Load and analyze Toy dataset
 2. Load and analyze Karate Club dataset
 3. Load and analyze Student cooperation dataset
 4. Load and analyze Anybeat dataset
 0. Quit
 
-## Project Structure
+## 🗂️ Project Structure
 ```
 project-root/
 │
@@ -68,7 +68,7 @@ project-root/
 └── README.md
 ```
 
-## Key Functions
+## 🔧 Key Functions
 - `edge_list()`: Parse network edge data from files
 - `create_adjacency_matrix()`: Generate adjacency matrix representation
 - `find_leaders()`: Identify most connected nodes
@@ -76,11 +76,11 @@ project-root/
 - `bfs_shortest_path()`: Find shortest path between nodes
 - `draw_graph()`: Visualize network with highlighted leaders
 
-## Learning Objectives
+## 🎯 Learning Objectives
 - Master basic graph concepts
 - Implement graph analysis algorithms
 - Visualize complex network structures
 
 
-## Contributing
+## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to fork the repo and submit a pull request.
