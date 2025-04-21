@@ -2,10 +2,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import os
-from collections import defaultdict
 import csv 
-
-
 
 def edge_list(file_path):
     edges = []
@@ -156,7 +153,7 @@ def analyze_toy_dataset():
         print(f"Shortest path between leaders {leaders[0]} and {leaders[1]} is: {path}")
         
         draw_graph(edges, nodes, leaders, "Toy dataset graph - Leaders in red", output_file=os.path.join(output_directory, "toy_graph.png"))
-        
+    
         print("\n=== Toy dataset Analysis done ===\n")
         return True
         
@@ -302,7 +299,6 @@ def analyze_student_dataset():
             
             print(f"Adjacency matrix saved in {output_matrix}")
 
-
         except Exception as e:
                 print(f"Error details: {e}")
 
@@ -312,11 +308,21 @@ def analyze_student_dataset():
         best_followers = find_followers(adj_matrix, nodes, k=5)
         print(f"5 nodes with the most conection: {best_followers}")
 
+        if len(best_followers) >= 2:
+            path = bfs_shortest_path(adj_matrix, node_to_index, best_followers[0], best_followers[1], nodes)
+            print(f"Shortest path between best followers {best_followers[0]} and {best_followers[1]} is: {path}")
+   
+        graph_edges = [(id1, id2) for id1, id2, _ in edges]
+        
+        output_file = os.path.join(output_directory, "students_graph.png")
+        
+        draw_graph(graph_edges, nodes, leaders,"Student cooperation graph - Leaders in red", output_file=os.path.join(output_directory, "Students_graph.png"))
+        print(f"Graph visualization saved in {output_file}")
+
     except Exception as e:
         print(f"Error during analysis: {str(e)}")
 
     return True
-
 
 def analyze_anybeatAnonymized_dataset():
     
