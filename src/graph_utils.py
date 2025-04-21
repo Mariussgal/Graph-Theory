@@ -216,11 +216,9 @@ def analyze_karate_club_dataset():
 
 def analyze_student_dataset():
     
-    current_dir = os.getcwd()
     input_file = ["students.csv"]
     
     output_matrix = os.path.join("data","students_adjacency_matrix.txt")
-    output_image = os.path.join("graphs", "students_network_graph.png")
     
     print("\n=== Analysis of Students dataset ===\n")
     
@@ -304,13 +302,19 @@ def analyze_student_dataset():
             
             print(f"Adjacency matrix saved in {output_matrix}")
 
+
         except Exception as e:
                 print(f"Error details: {e}")
+
+        leaders = find_leaders(adj_matrix, nodes, k=5)
+        print(f"5 most important leaders are: {leaders}")
+
+        best_followers = find_followers(adj_matrix, nodes, k=5)
+        print(f"5 nodes with the most conection: {best_followers}")
 
     except Exception as e:
         print(f"Error during analysis: {str(e)}")
 
-    print("\n=== Analysis of Students dataset done ===\n")
     return True
 
 
