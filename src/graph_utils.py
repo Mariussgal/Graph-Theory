@@ -3,6 +3,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import os
 from collections import defaultdict
+import csv 
+
 
 
 def edge_list(file_path):
@@ -213,50 +215,103 @@ def analyze_karate_club_dataset():
     
 
 def analyze_student_dataset():
-    file_path = os.path.join("data", "students.csv")
-    output_matrix = os.path.join("data", "students_adjacency_matrix.txt")
+    
+    current_dir = os.getcwd()
+    input_file = ["students.csv"]
+    
+    output_matrix = os.path.join("data","students_adjacency_matrix.txt")
+    output_image = os.path.join("graphs", "students_network_graph.png")
+    
+    print("\n=== Analysis of Students dataset ===\n")
+    
+    for filename in input_file:
+        if os.path.exists(filename):
+            input_file = filename
+            break
+        
+        data_path = os.path.join("data", filename)
+        if os.path.exists(data_path):
+            input_file = data_path
+            break
+    
+    if input_file is None:
+        print("Error: Could not find student data file")
+        return
     
     try:
-        print("\n=== Analysis of Student Cooperation dataset ===")
-
         edges = []
-        nodes = set()  #set() means that it deeletes all the multiple iterations of a number to keep only one of them
-        edge_types = defaultdict(list)
+       
+        with open(input_file, 'r') as file:
+            csv_reader = csv.reader(file)
+            try:
+                next(csv_reader)
+            except StopIteration:
+                print("Warning: CSV file appears to be empty")
+                return
+                
+            for row in csv_reader:
+                if len(row) >= 2:
+                    id1 = int(row[0])
+                    id2 = int(row[1])
+                    link_type = row[2] 
+                    edges.append((id1, id2, link_type))
 
-        with open(file_path, 'r') as file: 
-            first_line = file.readline().strip()
-            if first_line.lower().replace(' ','').replace(',','') in ['id1id2type', 'sourcetargettype']:
-                print (f"Header found and ignored: {first_line}")
-            for line in file:
-                try:
-                    parts = line.strip().split(',')
-                    if len(parts) ==3:
-                        source, target, type = parts
-                        source, target = int(source), int(target) 
-
-                        edges.append((source, target))
-                        nodes.add(source)
-                        nodes.add(target)
-                        edge_types[(source, target)].append(edge_types)
-                    else:
-                        print(f"Line ignored (wrong format):{line.strip()}")
-                except ValueError as e: 
-                    print(f"Line ignored: {line.strip()} - {e}")
-        
+        nodes = set()
+        for id1, id2, _ in edges:
+            nodes.add(id1)
+            nodes.add(id2)
         nodes = sorted(list(nodes))
-        print(f"Number of nodes: {len(nodes)}")
+        
+        print(f"Number of nodes: {len(nodes)}")            
         print(f"Number of edges: {len(edges)}")
+        
+        if not edges:
+            print("Error: No edges found in the input file")
+            return
+        
+        link_types = {}
+        for _, _, link_type in edges:
+            link_types[link_type] = link_types.get(link_type, 0) + 1
+        
+        print("Number of types:")
+        for link_type, count in link_types.items():
+            print(f"- {link_type}: {count} edges")   
+        
+        n = len(nodes)
+        node_to_index = {node: i for i, node in enumerate(nodes)}
 
-        print("=== Analysis of Student Cooperation dataset done ===\n")
-        return True
-    except FileNotFoundError:
-        print(f"file '{file_path}' not found.")
-        return False
+        adj_matrix = np.zeros((n, n), dtype=int)
+
+        for id1, id2, _ in edges:
+            i = node_to_index[id1]
+            j = node_to_index[id2]
+            adj_matrix[i][j] = 1
+            adj_matrix[j][i] = 1
+   
+        print(f"\nAdjacency matrix created:")
+        try:
+            results_dir = os.path.dirname(output_matrix)
+            if results_dir and not os.path.exists(results_dir):
+                print(f"Creating directory: {results_dir}")
+                os.makedirs(results_dir, exist_ok=True)
+            
+            with open(output_matrix, 'w') as file:
+                file.write(',' + ','.join(map(str, nodes)) + '\n')
+                
+                for i, node in enumerate(nodes):
+                    row_values = ','.join(map(str, adj_matrix[i]))
+                    file.write(f"{node},{row_values}\n")
+            
+            print(f"Adjacency matrix saved in {output_matrix}")
+
+        except Exception as e:
+                print(f"Error details: {e}")
+
     except Exception as e:
-        print(f"an error occured: {e}")
-        return False
+        print(f"Error during analysis: {str(e)}")
 
-
+    print("\n=== Analysis of Students dataset done ===\n")
+    return True
 
 
 def analyze_anybeatAnonymized_dataset():
