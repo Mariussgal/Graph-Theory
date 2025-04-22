@@ -475,8 +475,6 @@ def analyze_anybeatAnonymized_dataset():
         try:
             import networkx as nx
             import matplotlib.pyplot as plt
-            
-            print("\nCreating visualization of leaders and important path:")
            
             G = nx.Graph()
             G.add_nodes_from(sample_nodes)
