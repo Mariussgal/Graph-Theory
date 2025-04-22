@@ -22,6 +22,7 @@ The project includes four datasets of increasing complexity:
 - NumPy
 - NetworkX
 - Matplotlib
+- rich
 
 ## 🛠️ Installation
 1. Clone the repository
@@ -32,7 +33,7 @@ cd Graph-Theory
 
 2. Install required dependencies
 ```bash
-pip install numpy networkx matplotlib
+pip install numpy networkx matplotlib rich
 ```
 
 ## ▶️ Usage
